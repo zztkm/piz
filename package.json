@@ -1,0 +1,43 @@
+{
+  "name": "piz",
+  "version": "0.1.0",
+  "description": "A collection of Pi Coding Agent extensions.",
+  "type": "module",
+  "private": true,
+  "files": [
+    "extensions",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test"
+  },
+  "keywords": [
+    "pi",
+    "pi-package",
+    "coding-agent",
+    "extension",
+    "agent-skills",
+    "sub-agent"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.79.6",
+    "@types/node": "^25.9.3",
+    "typebox": "^1.2.16",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
