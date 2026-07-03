@@ -1,7 +1,4 @@
-import type {
-  ForgeReadonlySessionManager,
-  ForgeSessionTurn,
-} from "./types.js";
+import type { ForgeReadonlySessionManager, ForgeSessionTurn } from "./types.js";
 
 export interface CollectSessionOptions {
   since?: string;
@@ -55,8 +52,7 @@ export function normalizeEntry(
       timestamp: numberOrStringValue(message.timestamp) ?? timestamp,
       text: extractContentText(message.content),
       toolName: stringValue(message.toolName),
-      isError:
-        typeof message.isError === "boolean" ? message.isError : undefined,
+      isError: typeof message.isError === "boolean" ? message.isError : undefined,
       label,
     };
   }
@@ -169,9 +165,7 @@ function stringValue(value: unknown): string | undefined {
 }
 
 function numberOrStringValue(value: unknown): number | string | undefined {
-  return typeof value === "number" || typeof value === "string"
-    ? value
-    : undefined;
+  return typeof value === "number" || typeof value === "string" ? value : undefined;
 }
 
 function stableUnknownId(entry: Record<string, unknown>): string {

@@ -29,14 +29,8 @@ describe("forge options", () => {
   });
 
   it("rejects removed file output options", () => {
-    expect(() => parseForgeArgs("--scope all")).toThrow(
-      "Unknown /forge argument: --scope",
-    );
-    expect(() => parseForgeArgs("--out .pi/forge")).toThrow(
-      "Unknown /forge argument: --out",
-    );
-    expect(() => parseForgeArgs("--format json")).toThrow(
-      "Unknown /forge argument: --format",
-    );
+    expect(() => parseForgeArgs("--scope all")).toThrow("Unknown /forge argument: --scope");
+    expect(() => parseForgeArgs("--out .pi/forge")).toThrow("Unknown /forge argument: --out");
+    expect(() => parseForgeArgs("--format json")).toThrow("Unknown /forge argument: --format");
   });
 });

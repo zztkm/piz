@@ -25,7 +25,9 @@ describe("runForge", () => {
     expect(sendUserMessage).toHaveBeenCalledTimes(1);
     expect(getBranch).not.toHaveBeenCalled();
     expect(result.turnCount).toBe(0);
-    expect(result.prompt).toContain("Please use the current conversation context already available to you");
+    expect(result.prompt).toContain(
+      "Please use the current conversation context already available to you",
+    );
     expect(result.prompt).toContain("AGENTS.md");
     expect(result.prompt).toContain(".agents/skills/");
     expect(result.prompt).toContain("Session digest included: no");

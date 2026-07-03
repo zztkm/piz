@@ -11,8 +11,7 @@ import type {
 
 export default function piForgeExtension(pi: ForgeExtensionApi): void {
   pi.registerCommand("forge", {
-    description:
-      "Ask the agent how to maintain AGENTS.md or Agent Skills from this session",
+    description: "Ask the agent how to maintain AGENTS.md or Agent Skills from this session",
     getArgumentCompletions: (prefix) => {
       const items = [
         { value: "all", label: "all", description: "Advise on AGENTS.md and Skills" },
@@ -31,14 +30,8 @@ export default function piForgeExtension(pi: ForgeExtensionApi): void {
     handler: async (args, ctx) => {
       try {
         const result = await runForge(args, ctx, pi);
-        const turnSummary =
-          result.turnCount > 0
-            ? ` with ${result.turnCount} session turns`
-            : "";
-        ctx.ui?.notify?.(
-          `Pi Forge sent a guidance advice request${turnSummary}.`,
-          "info",
-        );
+        const turnSummary = result.turnCount > 0 ? ` with ${result.turnCount} session turns` : "";
+        ctx.ui?.notify?.(`Pi Forge sent a guidance advice request${turnSummary}.`, "info");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         ctx.ui?.notify?.(`Pi Forge failed: ${message}`, "error");
@@ -64,9 +57,7 @@ export async function runForge(
   const turns = options.includeSession
     ? collectSessionTurns(ctx.sessionManager, { since: options.since })
     : [];
-  const redacted = options.includeSession
-    ? redactTurns(turns)
-    : { turns, count: 0 };
+  const redacted = options.includeSession ? redactTurns(turns) : { turns, count: 0 };
   const prompt = buildAdvicePrompt({
     options,
     turns: redacted.turns,
@@ -83,8 +74,4 @@ export async function runForge(
   };
 }
 
-export type {
-  ForgeOptions,
-  ForgeRunResult,
-  ForgeSessionTurn,
-} from "./types.js";
+export type { ForgeOptions, ForgeRunResult, ForgeSessionTurn } from "./types.js";

@@ -1,8 +1,4 @@
-import type {
-  ForgeMode,
-  ForgeOptions,
-  ResolvedForgeOptions,
-} from "./types.js";
+import type { ForgeMode, ForgeOptions, ResolvedForgeOptions } from "./types.js";
 
 const MODES = new Set<ForgeMode>(["all", "agents", "skills"]);
 
@@ -60,11 +56,10 @@ function tokenize(args: string): string[] {
 
 function unquote(value: string): string {
   if (
-    (value.startsWith("\"") && value.endsWith("\"")) ||
+    (value.startsWith('"') && value.endsWith('"')) ||
     (value.startsWith("'") && value.endsWith("'"))
   ) {
     return value.slice(1, -1);
   }
   return value;
 }
-

@@ -1,8 +1,4 @@
-import type {
-  ForgeMode,
-  ForgeSessionTurn,
-  ResolvedForgeOptions,
-} from "./types.js";
+import type { ForgeMode, ForgeSessionTurn, ResolvedForgeOptions } from "./types.js";
 
 const MAX_TURNS = 40;
 const MAX_TEXT_PER_TURN = 900;
@@ -16,9 +12,7 @@ export interface AdvicePromptInput {
 
 export function buildAdvicePrompt(input: AdvicePromptInput): string {
   const target = targetDescription(input.options.mode);
-  const digest = input.options.includeSession
-    ? buildSessionDigest(input.turns)
-    : "";
+  const digest = input.options.includeSession ? buildSessionDigest(input.turns) : "";
 
   return [
     "Pi Forge is asking for guidance-maintenance advice.",
@@ -48,7 +42,9 @@ export function buildAdvicePrompt(input: AdvicePromptInput): string {
       : "No session digest is included. Rely on the active conversation context instead.",
     "",
     input.options.includeSession
-      ? (digest.length > 0 ? digest : "(No session content was available.)")
+      ? digest.length > 0
+        ? digest
+        : "(No session content was available.)"
       : "",
     "",
     "Please respond with concise advice grouped under:",
@@ -69,11 +65,7 @@ export function buildSessionDigest(turns: ForgeSessionTurn[]): string {
       const toolName = turn.toolName ? ` tool=${turn.toolName}` : "";
       const error = turn.isError ? " error=true" : "";
       const text = truncate(turn.text.trim(), MAX_TEXT_PER_TURN);
-      return [
-        `### ${turn.id} role=${turn.role}${label}${toolName}${error}`,
-        "",
-        text,
-      ].join("\n");
+      return [`### ${turn.id} role=${turn.role}${label}${toolName}${error}`, "", text].join("\n");
     })
     .join("\n\n");
 }

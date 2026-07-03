@@ -65,11 +65,7 @@ export default function (pi: ExtensionAPI) {
       "When command output is needed, run the command in the main agent and pass the relevant output to sub_agent for analysis.",
     ],
     parameters: Type.Object({
-      role: Type.Union([
-        Type.Literal("explore"),
-        Type.Literal("review"),
-        Type.Literal("plan"),
-      ], {
+      role: Type.Union([Type.Literal("explore"), Type.Literal("review"), Type.Literal("plan")], {
         description: "Preset that controls the sub agent's behavior and fixed read-only tools.",
       }),
       prompt: Type.String({
@@ -79,34 +75,45 @@ export default function (pi: ExtensionAPI) {
       description: Type.String({
         description: "Short 3-5 word description of the delegated task.",
       }),
-      model: Type.Optional(Type.String({
-        description: "Optional Pi model pattern or provider/model id for the sub agent.",
-      })),
-      thinking: Type.Optional(Type.Union([
-        Type.Literal("off"),
-        Type.Literal("minimal"),
-        Type.Literal("low"),
-        Type.Literal("medium"),
-        Type.Literal("high"),
-        Type.Literal("xhigh"),
-      ], {
-        description: "Optional Pi thinking level for the sub agent.",
-      })),
-      timeoutSeconds: Type.Optional(Type.Number({
-        minimum: 1,
-        maximum: MAX_TIMEOUT_SECONDS,
-        description: `Optional timeout in seconds. Defaults to ${DEFAULT_TIMEOUT_SECONDS}.`,
-      })),
+      model: Type.Optional(
+        Type.String({
+          description: "Optional Pi model pattern or provider/model id for the sub agent.",
+        }),
+      ),
+      thinking: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("off"),
+            Type.Literal("minimal"),
+            Type.Literal("low"),
+            Type.Literal("medium"),
+            Type.Literal("high"),
+            Type.Literal("xhigh"),
+          ],
+          {
+            description: "Optional Pi thinking level for the sub agent.",
+          },
+        ),
+      ),
+      timeoutSeconds: Type.Optional(
+        Type.Number({
+          minimum: 1,
+          maximum: MAX_TIMEOUT_SECONDS,
+          description: `Optional timeout in seconds. Defaults to ${DEFAULT_TIMEOUT_SECONDS}.`,
+        }),
+      ),
     }),
     async execute(_toolCallId, params: SubAgentParams, signal, onUpdate, ctx) {
       const rolePrompt = rolePrompts[params.role];
       const timeoutSeconds = clampTimeout(params.timeoutSeconds);
 
       onUpdate?.({
-        content: [{
-          type: "text",
-          text: `Starting ${params.role} sub agent: ${params.description}`,
-        }],
+        content: [
+          {
+            type: "text",
+            text: `Starting ${params.role} sub agent: ${params.description}`,
+          },
+        ],
         details: {
           role: params.role,
           description: params.description,
@@ -131,10 +138,12 @@ export default function (pi: ExtensionAPI) {
 
       if (result.timedOut) {
         return {
-          content: [{
-            type: "text",
-            text: `Sub agent timed out after ${timeoutSeconds}s.${stderr ? `\n\nstderr:\n${stderr}` : ""}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Sub agent timed out after ${timeoutSeconds}s.${stderr ? `\n\nstderr:\n${stderr}` : ""}`,
+            },
+          ],
           details: { ...result, role: params.role },
           isError: true,
         };
@@ -142,24 +151,30 @@ export default function (pi: ExtensionAPI) {
 
       if (result.code !== 0) {
         return {
-          content: [{
-            type: "text",
-            text: [
-              `Sub agent failed with exit code ${result.code ?? "unknown"}.`,
-              stderr ? `stderr:\n${stderr}` : "",
-              output ? `stdout:\n${output}` : "",
-            ].filter(Boolean).join("\n\n"),
-          }],
+          content: [
+            {
+              type: "text",
+              text: [
+                `Sub agent failed with exit code ${result.code ?? "unknown"}.`,
+                stderr ? `stderr:\n${stderr}` : "",
+                output ? `stdout:\n${output}` : "",
+              ]
+                .filter(Boolean)
+                .join("\n\n"),
+            },
+          ],
           details: { ...result, role: params.role },
           isError: true,
         };
       }
 
       return {
-        content: [{
-          type: "text",
-          text: output || "Sub agent completed without output.",
-        }],
+        content: [
+          {
+            type: "text",
+            text: output || "Sub agent completed without output.",
+          },
+        ],
         details: {
           role: params.role,
           description: params.description,
@@ -177,10 +192,7 @@ function registerSubAgentCommand(pi: ExtensionAPI, name: string) {
     handler: async (args, ctx) => {
       const parsed = parseCommandArgs(args);
       if (!parsed) {
-        ctx.ui.notify(
-          "Usage: /sub-agent <explore|review|plan> <task>",
-          "error",
-        );
+        ctx.ui.notify("Usage: /sub-agent <explore|review|plan> <task>", "error");
         return;
       }
 
@@ -216,7 +228,9 @@ function registerSubAgentCommand(pi: ExtensionAPI, name: string) {
         });
 
         ctx.ui.notify(
-          message.isError ? `${parsed.role} sub agent failed` : `${parsed.role} sub agent completed`,
+          message.isError
+            ? `${parsed.role} sub agent failed`
+            : `${parsed.role} sub agent completed`,
           message.isError ? "error" : "info",
         );
       } catch (error) {
@@ -271,7 +285,9 @@ function formatCommandMessage(options: {
       content: [
         `${header}: timed out after ${options.timeoutSeconds}s.`,
         stderr ? `stderr:\n${stderr}` : "",
-      ].filter(Boolean).join("\n\n"),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       isError: true,
     };
   }
@@ -282,17 +298,15 @@ function formatCommandMessage(options: {
         `${header}: failed with exit code ${options.result.code ?? "unknown"}.`,
         stderr ? `stderr:\n${stderr}` : "",
         output ? `stdout:\n${output}` : "",
-      ].filter(Boolean).join("\n\n"),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       isError: true,
     };
   }
 
   return {
-    content: [
-      header,
-      "",
-      output || "Sub agent completed without output.",
-    ].join("\n"),
+    content: [header, "", output || "Sub agent completed without output."].join("\n"),
     isError: false,
   };
 }
@@ -387,17 +401,19 @@ async function runPiSubAgent(options: {
       });
     });
 
-    child.stdin.end([
-      `Role: ${options.role}`,
-      "",
-      "Task:",
-      options.prompt,
-      "",
-      "Constraints:",
-      "- You are read-only.",
-      "- Do not run shell commands.",
-      "- Do not edit files.",
-      "- Keep the final report concise and useful to the main agent.",
-    ].join("\n"));
+    child.stdin.end(
+      [
+        `Role: ${options.role}`,
+        "",
+        "Task:",
+        options.prompt,
+        "",
+        "Constraints:",
+        "- You are read-only.",
+        "- Do not run shell commands.",
+        "- Do not edit files.",
+        "- Keep the final report concise and useful to the main agent.",
+      ].join("\n"),
+    );
   });
 }
