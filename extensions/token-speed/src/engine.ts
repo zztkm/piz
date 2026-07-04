@@ -9,6 +9,7 @@
 
 export class TokenSpeedEngine {
   private startMs = 0;
+  private ttftEndMs = 0;
   private active = false;
   // Anthropic の streaming 毎に incremental に token 数を送ってくるので
   // tokensAtStart は最初の streaming チャンクの output で初期化
@@ -21,22 +22,25 @@ export class TokenSpeedEngine {
 
   start(): void {
     this.startMs = Date.now();
+    this.ttftEndMs = 0;
     this.active = true;
     this.tokensAtStart = 0;
     this.latestTokens = 0;
-    this.deltaTokenCount = 0;
+    this.deltaCharAccumulator = 0;
   }
 
   get elapsedSec(): number {
     if (!this.active) {
       return 0;
     }
-    return (Date.now() - this.startMs) / 1000;
+    // 最初の一文字が出た後の時間を分母にする (TTFTを除外して純粋な書き出し速度を測る)
+    const start = this.ttftEndMs || this.startMs;
+    return (Date.now() - start) / 1000;
   }
 
   // ds4 style: tokensSinceStart / elapsed
   get tps(): number {
-    if (!this.active) {
+    if (!this.active || this.ttftEndMs === 0) {
       return 0;
     }
     const elapsed = this.elapsedSec;
@@ -59,6 +63,10 @@ export class TokenSpeedEngine {
     if (!this.active || outputTokens <= 0) {
       return;
     }
+    // 最初の一文字が届いた時間を記録 (TTFT終了時刻)
+    if (this.ttftEndMs === 0) {
+      this.ttftEndMs = Date.now();
+    }
     // cumulative なので max で clamp
     if (outputTokens > this.latestTokens) {
       this.latestTokens = outputTokens;
@@ -69,6 +77,10 @@ export class TokenSpeedEngine {
   recordDelta(deltaCharCount: number): void {
     if (!this.active || deltaCharCount <= 0) {
       return;
+    }
+    // 最初の一文字が届いた時間を記録 (TTFT終了時刻)
+    if (this.ttftEndMs === 0) {
+      this.ttftEndMs = Date.now();
     }
     this.deltaCharAccumulator += deltaCharCount;
   }
@@ -94,6 +106,7 @@ export class TokenSpeedEngine {
   // フルリセット（session shutdown のためなど）
   reset(): void {
     this.startMs = 0;
+    this.ttftEndMs = 0;
     this.active = false;
     this.tokensAtStart = 0;
     this.latestTokens = 0;
