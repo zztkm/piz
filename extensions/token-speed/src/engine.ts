@@ -17,7 +17,7 @@ export class TokenSpeedEngine {
   private latestTokens = 0;
   // fallback: Ollama / OpenAI は streaming チャンクに usage を含まないため
   // delta テキスト長からトークン数を推定してカウント
-  private deltaTokenCount = 0;
+  private deltaCharAccumulator = 0;
 
   start(): void {
     this.startMs = Date.now();
@@ -45,7 +45,7 @@ export class TokenSpeedEngine {
     }
     // latestTokens - tokensAtStart = streaming 中に provider が計上した token
     const outputSinceStart = Math.max(0, this.latestTokens - this.tokensAtStart);
-    const totalTokens = outputSinceStart + this.deltaTokenCount;
+    const totalTokens = outputSinceStart + (this.deltaCharAccumulator / 4);
     return totalTokens / elapsed;
   }
 
@@ -70,8 +70,7 @@ export class TokenSpeedEngine {
     if (!this.active || deltaCharCount <= 0) {
       return;
     }
-    // ~4 chars = 1 token の簡易推定
-    this.deltaTokenCount += Math.max(Math.floor(deltaCharCount / 4), 1);
+    this.deltaCharAccumulator += deltaCharCount;
   }
 
   // stream を終了し、最終トークン数で accuracy を合わせる（ds4 style: w->status.gen_tps）
@@ -98,7 +97,7 @@ export class TokenSpeedEngine {
     this.active = false;
     this.tokensAtStart = 0;
     this.latestTokens = 0;
-    this.deltaTokenCount = 0;
+    this.deltaCharAccumulator = 0;
     this._finalTps = 0;
   }
 
