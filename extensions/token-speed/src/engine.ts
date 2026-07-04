@@ -59,10 +59,6 @@ export class TokenSpeedEngine {
     if (!this.active || outputTokens <= 0) {
       return;
     }
-    // 初回観測値を記録（Anthropic は最初の streaming チャンクで ~1 を送る）
-    if (this.tokensAtStart === 0) {
-      this.tokensAtStart = outputTokens;
-    }
     // cumulative なので max で clamp
     if (outputTokens > this.latestTokens) {
       this.latestTokens = outputTokens;
