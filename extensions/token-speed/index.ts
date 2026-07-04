@@ -33,7 +33,7 @@ export default function _register(pi: ExtensionAPI): void {
       engine.record(outputFromPartial);
     } else {
       // fallback: Ollama / OpenAI は delta から推定
-      const deltaStr = (event.assistantMessageEvent as any).delta ?? "";
+      const deltaStr = (event.assistantMessageEvent as any)?.delta ?? "";
       if (deltaStr.length > 0) {
         engine.recordDelta(deltaStr.length);
       }
